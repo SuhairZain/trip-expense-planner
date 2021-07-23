@@ -1,92 +1,88 @@
-export interface IPerson {
-  id: string;
-  amount: number;
-}
+import { IConflict, IResource } from "./interfaces";
 
-export type IClash = [IPerson, IPerson];
-
-export const getExcludedPeopleOnInclude = (
-  people: IPerson[],
-  clashes: IClash[],
-  includedPerson: IPerson
+export const getExcludedResourcesOnSelect = (
+  resources: IResource[],
+  conflicts: IConflict[],
+  selectedResource: IResource
 ) => {
-  if (people.length === 1) {
+  if (resources.length === 1) {
     return [];
   }
 
-  const everyOneElse = people.filter((p) => p !== includedPerson);
+  const otherResources = resources.filter((p) => p !== selectedResource);
 
-  if (clashes.length === 0) {
+  if (conflicts.length === 0) {
     return [];
   }
 
-  const clashesWithTheIncluded = clashes
-    .filter(([p1, p2]) => p1 === includedPerson || p2 === includedPerson)
-    .map(([p1, p2]) => (p1 === includedPerson ? p2 : p1));
+  const conflictsWithTheSelected = conflicts
+    .filter(([r1, r2]) => r1 === selectedResource || r2 === selectedResource)
+    .map(([r1, r2]) => (r1 === selectedResource ? r2 : r1));
 
-  return everyOneElse.filter((p) => clashesWithTheIncluded.includes(p));
+  return otherResources.filter((p) => conflictsWithTheSelected.includes(p));
 };
 
 export const findMaximumPool = (
-  people: IPerson[],
-  clashes: IClash[]
-): IPerson[] => {
-  if (clashes.length === 0) {
-    return people;
+  resources: IResource[],
+  conflicts: IConflict[]
+): IResource[] => {
+  if (conflicts.length === 0) {
+    return resources;
   }
 
-  if (people.length === 0) {
+  if (resources.length === 0) {
     return [];
   }
 
-  const includedPerson = people[0];
-  const excludedPeople = getExcludedPeopleOnInclude(
-    people,
-    clashes,
-    includedPerson
+  const selectedResource = resources[0];
+  const excludedResources = getExcludedResourcesOnSelect(
+    resources,
+    conflicts,
+    selectedResource
   );
 
-  if (excludedPeople.length === 0) {
-    return [includedPerson].concat(
+  if (excludedResources.length === 0) {
+    return [selectedResource].concat(
       findMaximumPool(
-        people.filter((p) => p !== includedPerson),
-        clashes
+        resources.filter((p) => p !== selectedResource),
+        conflicts
       )
     );
   }
 
-  const excludedPeopleSum = excludedPeople.reduce(
-    (acc, curr) => acc + curr.amount,
+  const excludedResourcesSum = excludedResources.reduce(
+    (acc, curr) => acc + curr.value,
     0
   );
 
-  const includedPersonWorthMore = includedPerson.amount >= excludedPeopleSum;
+  const selectedResourceWorthMoreThanExcluded =
+    selectedResource.value >= excludedResourcesSum;
 
-  if (includedPersonWorthMore) {
-    const otherThanExcludedAndIncluded = people.filter(
-      (p) => !excludedPeople.includes(p) && p !== includedPerson
+  if (selectedResourceWorthMoreThanExcluded) {
+    const otherThanExcludedAndSelected = resources.filter(
+      (r) => !excludedResources.includes(r) && r !== selectedResource
     );
-    const clashesOtherThanExcludedAndIncluded = clashes.filter(
-      ([p1, p2]) =>
-        !excludedPeople.includes(p1) &&
-        !excludedPeople.includes(p2) &&
-        p1 !== includedPerson &&
-        p2 !== includedPerson
+    const conflictsOtherThanExcludedAndSelected = conflicts.filter(
+      ([r1, r2]) =>
+        !excludedResources.includes(r1) &&
+        !excludedResources.includes(r2) &&
+        r1 !== selectedResource &&
+        r2 !== selectedResource
     );
 
-    return [includedPerson].concat(
+    return [selectedResource].concat(
       findMaximumPool(
-        otherThanExcludedAndIncluded,
-        clashesOtherThanExcludedAndIncluded
+        otherThanExcludedAndSelected,
+        conflictsOtherThanExcludedAndSelected
       )
     );
   }
 
-  const clashesWithoutIncluded = clashes.filter(
-    ([p1, p2]) => p1 !== includedPerson && p2 !== includedPerson
+  const conflictsWithoutSelected = conflicts.filter(
+    ([r1, r2]) => r1 !== selectedResource && r2 !== selectedResource
   );
   return findMaximumPool(
-    people.filter((p) => p !== includedPerson),
-    clashesWithoutIncluded
+    resources.filter((r) => r !== selectedResource),
+    conflictsWithoutSelected
   );
 };

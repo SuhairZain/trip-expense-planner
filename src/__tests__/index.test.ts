@@ -1,99 +1,99 @@
-import {
-  findMaximumPool,
-  getExcludedPeopleOnInclude,
-  IClash,
-  IPerson,
-} from "..";
+import { findMaximumPool, getExcludedResourcesOnSelect } from "..";
+import { IConflict, IResource } from "../interfaces";
 
-const people: IPerson[] = [
-  { id: "0", amount: 1000 },
-  { id: "1", amount: 500 },
-  { id: "2", amount: 400 },
-  { id: "3", amount: 800 },
-  { id: "4", amount: 600 },
-  { id: "5", amount: 900 },
+const resources: IResource[] = [
+  { id: "0", value: 1000 },
+  { id: "1", value: 500 },
+  { id: "2", value: 400 },
+  { id: "3", value: 800 },
+  { id: "4", value: 600 },
+  { id: "5", value: 900 },
 ];
 
-describe("WHEN getExcludedPeopleOnInclude", () => {
-  for (const person of people) {
-    describe(`WHEN given clashes with everyone else (${person.id})`, () => {
-      it("SHOULD return a list with everyone else", () => {
-        const excludedPeople = getExcludedPeopleOnInclude(
-          people,
-          people.filter((p) => p !== person).map((p) => [person, p]),
-          person
+describe("WHEN getExcludedResourcesOnSelect", () => {
+  for (const resource of resources) {
+    describe(`WHEN given conflicts with all other resources (${resource.id})`, () => {
+      it("SHOULD return a list with everything else", () => {
+        const excludedResources = getExcludedResourcesOnSelect(
+          resources,
+          resources.filter((p) => p !== resource).map((p) => [resource, p]),
+          resource
         );
 
-        expect(excludedPeople).toHaveLength(5);
-        expect(excludedPeople).not.toContain(person);
+        expect(excludedResources).toHaveLength(5);
+        expect(excludedResources).not.toContain(resource);
       });
     });
   }
 
-  for (const person of people) {
-    describe(`WHEN given clashes with no one (${person.id})`, () => {
+  for (const resource of resources) {
+    describe(`WHEN given conflicts with no other resource (${resource.id})`, () => {
       it("SHOULD return an empty list", () => {
-        const excludedPeople = getExcludedPeopleOnInclude(people, [], person);
+        const excludedResources = getExcludedResourcesOnSelect(
+          resources,
+          [],
+          resource
+        );
 
-        expect(excludedPeople).toHaveLength(0);
+        expect(excludedResources).toHaveLength(0);
       });
     });
   }
 
-  describe("WHEN given a single person list", () => {
+  describe("WHEN given a single resource list", () => {
     it("SHOULD return an empty list", () => {
-      const excludedPeople = getExcludedPeopleOnInclude(
-        [people[0]],
+      const excludedResources = getExcludedResourcesOnSelect(
+        [resources[0]],
         [],
-        people[0]
+        resources[0]
       );
 
-      expect(excludedPeople).toHaveLength(0);
+      expect(excludedResources).toHaveLength(0);
     });
   });
 });
 
 describe("WHEN findMaximumPool", () => {
-  describe("WHEN given a list with no clashes", () => {
+  describe("WHEN given a list with no conflicts", () => {
     it("SHOULD return everyone", () => {
-      const clashes: IClash[] = [];
+      const conflicts: IConflict[] = [];
 
-      expect(findMaximumPool(people, clashes)).toEqual(people);
+      expect(findMaximumPool(resources, conflicts)).toEqual(resources);
     });
   });
 
-  describe("WHEN given a list with non-overlapping clashes", () => {
+  describe("WHEN given a list with non-overlapping conflicts", () => {
     it("SHOULD return the list with the max amount", () => {
-      const clashes: IClash[] = [
-        [people[0], people[1]],
-        [people[2], people[3]],
-        [people[4], people[5]],
+      const conflicts: IConflict[] = [
+        [resources[0], resources[1]],
+        [resources[2], resources[3]],
+        [resources[4], resources[5]],
       ];
 
-      expect(findMaximumPool(people, clashes)).toEqual([
-        people[0],
-        people[3],
-        people[5],
+      expect(findMaximumPool(resources, conflicts)).toEqual([
+        resources[0],
+        resources[3],
+        resources[5],
       ]);
     });
   });
 
-  describe("WHEN given a list with complicated clashes", () => {
+  describe("WHEN given a list with complicated conflicts", () => {
     it("SHOULD return the list with the max amount", () => {
-      const clashes: IClash[] = [
-        [people[0], people[1]],
-        [people[0], people[2]],
-        [people[0], people[3]],
-        [people[0], people[4]],
-        [people[0], people[5]],
+      const conflicts: IConflict[] = [
+        [resources[0], resources[1]],
+        [resources[0], resources[2]],
+        [resources[0], resources[3]],
+        [resources[0], resources[4]],
+        [resources[0], resources[5]],
       ];
 
-      expect(findMaximumPool(people, clashes)).toEqual([
-        people[1],
-        people[2],
-        people[3],
-        people[4],
-        people[5],
+      expect(findMaximumPool(resources, conflicts)).toEqual([
+        resources[1],
+        resources[2],
+        resources[3],
+        resources[4],
+        resources[5],
       ]);
     });
   });
