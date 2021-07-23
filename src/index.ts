@@ -5,7 +5,7 @@ export const getExcludedResourcesOnSelect = (
   conflicts: IConflict[],
   selectedResource: IResource
 ) => {
-  if (resources.length === 1) {
+  if (resources.length <= 1) {
     return [];
   }
 
