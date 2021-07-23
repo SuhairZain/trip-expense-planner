@@ -97,4 +97,46 @@ describe("WHEN findMaximumPool", () => {
       ]);
     });
   });
+
+  describe("WHEN given a list where a single resource has conflicts with all others but has the highest value", () => {
+    it("SHOULD return just the single resouce", () => {
+      const highValueResource = { ...resources[0], value: 6000 };
+
+      const conflicts: IConflict[] = [
+        [highValueResource, resources[1]],
+        [highValueResource, resources[2]],
+        [highValueResource, resources[3]],
+        [highValueResource, resources[4]],
+        [highValueResource, resources[5]],
+      ];
+
+      expect(
+        findMaximumPool(
+          [highValueResource].concat(resources.slice(1)),
+          conflicts
+        )
+      ).toEqual([highValueResource]);
+    });
+  });
+
+  describe("WHEN given a list where the last resource has conflicts with all others but has the highest value", () => {
+    it("SHOULD return just the single resouce", () => {
+      const highValueResource = { ...resources[5], value: 8000 };
+
+      const conflicts: IConflict[] = [
+        [highValueResource, resources[0]],
+        [highValueResource, resources[1]],
+        [highValueResource, resources[2]],
+        [highValueResource, resources[3]],
+        [highValueResource, resources[4]],
+      ];
+
+      expect(
+        findMaximumPool(
+          resources.slice(0, 5).concat(highValueResource),
+          conflicts
+        )
+      ).toEqual([highValueResource]);
+    });
+  });
 });
