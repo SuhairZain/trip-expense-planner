@@ -139,4 +139,52 @@ describe("WHEN findMaximumPool", () => {
       ).toEqual([highValueResource]);
     });
   });
+
+  describe("WHEN given a list where the every resource has conflicts with all others and all have equal value", () => {
+    it("SHOULD return just one of the resouces", () => {
+      const resources: IResource[] = [
+        { id: "0", value: 1000 },
+        { id: "1", value: 1000 },
+        { id: "2", value: 1000 },
+        { id: "3", value: 1000 },
+        { id: "4", value: 1000 },
+        { id: "5", value: 1000 },
+      ];
+
+      const conflicts: IConflict[] = [];
+      for (let i = 0; i < resources.length; i++) {
+        for (let j = i + 1; j < resources.length; j++) {
+          conflicts.push([resources[i], resources[j]]);
+        }
+      }
+
+      expect(findMaximumPool(resources, conflicts)).toEqual([resources[4]]);
+    });
+  });
+
+  describe("WHEN given a list where the every resource has conflicts (duplicated) with all others and all have equal value", () => {
+    it("SHOULD return just one of the resouces", () => {
+      const resources: IResource[] = [
+        { id: "0", value: 1000 },
+        { id: "1", value: 1000 },
+        { id: "2", value: 1000 },
+        { id: "3", value: 1000 },
+        { id: "4", value: 1000 },
+        { id: "5", value: 1000 },
+      ];
+
+      const conflicts: IConflict[] = [];
+      for (let i = 0; i < resources.length; i++) {
+        for (let j = 0; j < resources.length; j++) {
+          if (i === j) {
+            continue;
+          }
+
+          conflicts.push([resources[i], resources[j]]);
+        }
+      }
+
+      expect(findMaximumPool(resources, conflicts)).toEqual([resources[4]]);
+    });
+  });
 });
